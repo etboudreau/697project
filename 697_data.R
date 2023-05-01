@@ -31,7 +31,34 @@ data_munge = select(data,-c(dist_dirc_exit, age))%>%
 #none injured = 0, non fatal = 1, fatal = 2
 #removed unreported or unknown
 
-
+#---- 1 dataframe we could use
+data_munge2 = select(data,-c(dist_dirc_exit, age, max_injr_svrty_cl,
+                             numb_fatal_injr, numb_nonfatal_injr,injy_stat_descr,
+                             vehc_unit_numb,crash_status,max_injr_svrty_vl))%>%
+  filter(!is.na(speed_limit))%>% #filter out anything without speed limit
+  rename("severity" = "crash_severity_descr")%>% #changed column name
+  rename("weather" = "weath_cond_descr")%>%
+  mutate(severity=ifelse(severity=="Property damage only (none injured)",0, 
+                         ifelse(severity=="Non-fatal injury",1,ifelse(severity=="Fatal injury",2,3)
+                         )
+  )
+  )%>%
+  filter(severity!="3")%>% #remove any unreported or unknown severity levels
+  drop_na()%>% #drop any row with NA
+  mutate(weather = ifelse(weather =="Clear/Clear","Clear",ifelse(weather == "Rain/Rain","Rain",
+                          ifelse(weather=="Not Reported","Unknown",weather)
+                          )
+                      )
+                )%>% #concatenating weather conditions 
+  mutate(weather=ifelse(weather=="Clear",0, 
+                         ifelse(weather=="Cloudy",1,ifelse(weather=="Snow",2, 
+                                                      ifelse(weather=="Rain",3,
+                                                           ifelse(weather=="Unknown",5,weather)
+                         )
+                   )
+             )
+      )
+) #creating numerical code for different weather conditions
 
          
   
