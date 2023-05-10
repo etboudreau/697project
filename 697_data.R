@@ -4,10 +4,11 @@ library(readxl)
 library(tidyr)
 library(stringr)
 library(stringi)
+library(lubridate)
 
-#setwd('/Users/emmaboudreau/Documents/GitHub/697proj/')
+setwd('/Users/emmaboudreau/Documents/GitHub/697proj/')
 
-setwd('/Users/samuelesquivel/Documents/GitHub/697project/')
+#setwd('/Users/samuelesquivel/Documents/GitHub/697project/')
 
 
 # read in the data-----
@@ -37,7 +38,7 @@ data_munge = select(data,-c(dist_dirc_exit, age))%>%
 #---- 1 dataframe we could use
 data_munge2 = select(data,-c(dist_dirc_exit, age, max_injr_svrty_cl,
                              numb_fatal_injr, numb_nonfatal_injr,injy_stat_descr,
-                             vehc_unit_numb,crash_status,max_injr_svrty_vl))%>%
+                             vehc_unit_numb,crash_status,max_injr_svrty_vl, pers_numb))%>%
   filter(!is.na(speed_limit))%>% #filter out anything without speed limit
   rename("severity" = "crash_severity_descr")%>% #changed column name
   rename("weather" = "weath_cond_descr")%>%
@@ -49,21 +50,27 @@ data_munge2 = select(data,-c(dist_dirc_exit, age, max_injr_svrty_cl,
   filter(severity!="3")%>% #remove any unreported or unknown severity levels
   drop_na()%>% #drop any row with NA
   mutate(weather = ifelse(weather =="Clear/Clear","Clear",ifelse(weather == "Rain/Rain","Rain",
-                          ifelse(weather=="Not Reported","Unknown",
-                                 ifelse(weather=="Snow/Snow","Snow",weather)
-                              )
-                          )
-                      )
-                )%>% #concatenating weather conditions 
+                          ifelse(weather=="Not Reported","Unknown",ifelse(weather=="Snow/Snow","Snow",
+                            ifelse(weather=="Cloudy/Rain","Rain",ifelse(weather=="Clear/Cloudy", "Cloudy",
+                               ifelse(weather=="Snow/Cloudy","Snow",ifelse(weather=="Clear/Blowing sand, snow","Snow",
+                                  ifelse(weather=="Rain/Sleet, hail (freezing rain or drizzle)","Rain", ifelse(weather=="Snow/Blowing sand, snow", "Snow",
+                                    ifelse(weather=="Clear/Rain","Rain",ifelse(weather=="Cloudy/Cloudy","Cloudy",
+                                      ifelse(weather=="Rain/Cloudy","Rain",ifelse(weather=="Rain/Severe crosswinds","Rain",
+                                        ifelse(weather=="Snow/Sleet, hail (freezing rain or drizzle)", "Snow",weather)))))))))))
+                )))))%>% #concatenating weather conditions 
   mutate(weather=ifelse(weather=="Clear",0, 
                          ifelse(weather=="Cloudy",1,ifelse(weather=="Snow",2, 
                                                       ifelse(weather=="Rain",3,
-                                                           ifelse(weather=="Unknown",5,weather)
+                                                           ifelse(weather=="Unknown",5,6)
                          )
                    )
              )
       )
-) #creating numerical code for different weather conditions
+)%>% #creating numerical code for different weather conditions
+#filter(weather!="5")
+filter(weather!=c("5","6"))%>% #filtering out any unknown or other weather descriptions that are not frequently used/ambiguous
+rename("date"="crash_date")%>%
+mutate(date = as.Date(date, format= "%m/%d/%Y"))
 
          
   
