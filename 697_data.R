@@ -46,7 +46,9 @@ data_munge2 = select(data,-c(dist_dirc_exit, age, max_injr_svrty_cl,
   filter(severity!="3")%>% #remove any unreported or unknown severity levels
   drop_na()%>% #drop any row with NA
   mutate(weather = ifelse(weather =="Clear/Clear","Clear",ifelse(weather == "Rain/Rain","Rain",
-                          ifelse(weather=="Not Reported","Unknown",weather)
+                          ifelse(weather=="Not Reported","Unknown",
+                                 ifelse(weather=="Snow/Snow","Snow",weather)
+                              )
                           )
                       )
                 )%>% #concatenating weather conditions 
