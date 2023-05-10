@@ -18,16 +18,16 @@ data = read.csv('export.csv')
  
 #----
 
-data_munge = select(data,-c(dist_dirc_exit, age))%>%
-  filter(!is.na(speed_limit))%>% #filter out anything without speed limit
-  rename("severity" = "crash_severity_descr")%>% #changed column name
-  rename("weather" = "weath_cond_descr")%>%
-  mutate(severity=ifelse(severity=="Property damage only (none injured)",0, 
-          ifelse(severity=="Non-fatal injury",1,ifelse(severity=="Fatal injury",2,3)
-           )
-          )
-         )%>%
-  filter(severity!="3")
+# data_munge = select(data,-c(dist_dirc_exit, age))%>%
+#   filter(!is.na(speed_limit))%>% #filter out anything without speed limit
+#   rename("severity" = "crash_severity_descr")%>% #changed column name
+#   rename("weather" = "weath_cond_descr")%>%
+#   mutate(severity=ifelse(severity=="Property damage only (none injured)",0, 
+#           ifelse(severity=="Non-fatal injury",1,ifelse(severity=="Fatal injury",2,3)
+#            )
+#           )
+#          )%>%
+#   filter(severity!="3")
 
 #different ways to check number of observations for things
   #filter(numb_fatal_injr!="0")
@@ -36,7 +36,7 @@ data_munge = select(data,-c(dist_dirc_exit, age))%>%
 #removed unreported or unknown
 
 #---- 1 dataframe we could use
-data_munge2 = select(data,-c(dist_dirc_exit, age, max_injr_svrty_cl,
+data2 = select(data,-c(dist_dirc_exit, age, max_injr_svrty_cl,
                              numb_fatal_injr, numb_nonfatal_injr,injy_stat_descr,
                              vehc_unit_numb,crash_status,max_injr_svrty_vl, pers_numb))%>%
   filter(!is.na(speed_limit))%>% #filter out anything without speed limit
@@ -48,6 +48,7 @@ data_munge2 = select(data,-c(dist_dirc_exit, age, max_injr_svrty_cl,
   )
   )%>%
   filter(severity!="3")%>% #remove any unreported or unknown severity levels
+  filter(severity!="2")%>% #remove fatal injuries
   drop_na()%>% #drop any row with NA
   mutate(weather = ifelse(weather =="Clear/Clear","Clear",ifelse(weather == "Rain/Rain","Rain",
                           ifelse(weather=="Not Reported","Unknown",ifelse(weather=="Snow/Snow","Snow",
@@ -68,9 +69,24 @@ data_munge2 = select(data,-c(dist_dirc_exit, age, max_injr_svrty_cl,
       )
 )%>% #creating numerical code for different weather conditions
 #filter(weather!="5")
-filter(weather!=c("5","6"))%>% #filtering out any unknown or other weather descriptions that are not frequently used/ambiguous
+filter(weather!="5")%>% #filtering out any unknown or other weather descriptions that are not frequently used/ambiguous
+filter(weather!="6")
+
+WS<-as.Date("12/15/2018", format=  "%m/%d/%Y") #winter solstice
+SE<-as.Date("03/15/2018", format=  "%m/%d/%Y") #spring equinox
+SS<-as.Date("06/15/2018", format=  "%m/%d/%Y") #summer solstice
+FE<-as.Date("09/15/2018", format=  "%m/%d/%Y") #fall equinox
+
+#seasons code: winter = 0, spring = 1, summer = 2, fall = 3  
+data3 = data2%>%  
 rename("date"="crash_date")%>%
-mutate(date = as.Date(date, format= "%m/%d/%Y"))
+mutate(date = as.Date(date,format= "%m/%d/%Y"))%>%
+mutate(season = ifelse(date>=WS | date<SE, "0", ifelse(date>=SE & date< SS, "1",
+        ifelse(date>=SS&date< FE, "2", "3"))))
+
+
+
+
 
          
   
