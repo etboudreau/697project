@@ -5,7 +5,10 @@ library(tidyr)
 library(stringr)
 library(stringi)
 
-setwd('/Users/emmaboudreau/Documents/GitHub/697proj/')
+#setwd('/Users/emmaboudreau/Documents/GitHub/697proj/')
+#/Users/samuelesquivel/Documents/GitHub/697project
+setwd('/Users/samuelesquivel/Documents/GitHub/697project/')
+
 
 # read in the data-----
 
