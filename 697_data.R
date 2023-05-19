@@ -6,18 +6,22 @@ library(stringr)
 library(stringi)
 library(lubridate)
 
-setwd('/Users/emmaboudreau/Documents/GitHub/697proj/')
+#install.packages("ggmap")
+library(ggmap)
+#install.packages("ggplot2")
+library(ggplot2)
 
-#setwd('/Users/samuelesquivel/Documents/GitHub/697project/')
+
+
+#setwd('/Users/emmaboudreau/Documents/GitHub/697proj/')
+setwd('/Users/samuelesquivel/Documents/GitHub/697project/')
 
 
 # read in the data-----
-
 data = read.csv('export.csv')
   
  
 #----
-
 # data_munge = select(data,-c(dist_dirc_exit, age))%>%
 #   filter(!is.na(speed_limit))%>% #filter out anything without speed limit
 #   rename("severity" = "crash_severity_descr")%>% #changed column name
@@ -34,6 +38,8 @@ data = read.csv('export.csv')
   #filter(severity=="1")
 #none injured = 0, non fatal = 1, fatal = 2
 #removed unreported or unknown
+
+
 
 #---- 1 dataframe we could use
 data2 = select(data,-c(dist_dirc_exit, age, max_injr_svrty_cl,
@@ -86,14 +92,53 @@ mutate(season = ifelse(date>=WS | date<SE, "0", ifelse(date>=SE & date< SS, "1",
 
 
 
-
-
-         
-  
+####sam's additions below,###
 
 
 
+###REGARDING TIME###
+#step 1
+#convert existing date and time to standard POSIX format
+data3 <- data3 %>%
+  mutate(crash_time_2 = str_replace(crash_time_2, "\\s(AM|PM)", " \\1"),  # Remove the space before AM/PM
+         crash_time_2 = as.POSIXct(crash_time_2, format = "%I:%M %p"),  # Convert to POSIXct format
+         crash_date = as.Date(date))  # Convert 'date' to Date format
+
+data3 <- data3 %>%
+  mutate(crash_date_time_standard = as.POSIXct(paste(crash_date, format(crash_time_2, "%H:%M:%S")), format = "%Y-%m-%d %H:%M:%S"))
+#step 2
+#drop the excess columns we don't need anymore and make new polished data frame
+data4 <- data3 %>%
+  select(-crash_date, -date, -crash_time_2)
+#drop_na2()%>% #drop any row with NA
+#step 3
+#do some analysis on the timing of events
+#extract the hour from the crash_date_time_standard column
+data4 <- data4 %>%
+  mutate(hour = hour(crash_date_time_standard))
+#calculate the crash count for each hour
+crash_count <- data4 %>%
+  count(hour)
+#plot the crash count by hour
+plot(crash_count$hour, crash_count$n, type = "l", xlab = "Hour of Day", ylab = "Crash Count", main = "Crash Count by Hour")
 
 
+
+###REGARDING LOCATION###
+# Load required libraries
+library(ggplot2)
+library(ggmap)
+#set the latitude and longitude boundaries for Boston area
+boston_bounds <- c(left = -71.1912, bottom = 42.2279, right = -70.8085, top = 42.3974)
+#get the map background using ggmap and specify the map type
+boston_map <- get_stamenmap(boston_bounds, maptype = "toner-lite")
+#plot the map of Boston
+ggmap(boston_map) +
+  #add points representing crash locations
+  geom_point(data = data4, aes(x = lon, y = lat), color = "red", alpha = 0.5) +
+  #adjust the transparency and color of the points
+  guides(alpha = FALSE) +
+  labs(title = "Crashes in Boston, MA") +
+  theme(plot.title = element_text(hjust = 0.5))
 
 
