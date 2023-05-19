@@ -13,8 +13,8 @@ library(ggplot2)
 
 
 
-#setwd('/Users/emmaboudreau/Documents/GitHub/697proj/')
-setwd('/Users/samuelesquivel/Documents/GitHub/697project/')
+setwd('/Users/emmaboudreau/Documents/GitHub/697proj/')
+#setwd('/Users/samuelesquivel/Documents/GitHub/697project/')
 
 
 # read in the data-----
