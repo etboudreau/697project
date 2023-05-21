@@ -10,8 +10,8 @@ library(lubridate)
 library(ggmap)
 #install.packages("ggplot2")
 library(ggplot2)
-
-
+#install.packages("caTools")
+library(caTools)
 
 setwd('/Users/emmaboudreau/Documents/GitHub/697proj/')
 #setwd('/Users/samuelesquivel/Documents/GitHub/697project/')
@@ -141,4 +141,12 @@ ggmap(boston_map) +
   labs(title = "Crashes in Boston, MA") +
   theme(plot.title = element_text(hjust = 0.5))
 
+#---- Logistic regression
+set.seed(100)
+split <- sample.split(data4$severity, SplitRatio = 0.7)
+train_data <- subset(data4, split == TRUE)
+test_data <- subset(data4, split == FALSE)
 
+lg_model <- glm(severity~ lat + lon + numb_vehc + speed_limit + driver_age + 
+                  total_occpt_in_vehc + season + hour + weather)
+#----
