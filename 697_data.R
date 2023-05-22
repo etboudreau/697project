@@ -13,9 +13,8 @@ library(ggplot2)
 #install.packages("caTools")
 library(caTools)
 
-setwd('/Users/emmaboudreau/Documents/GitHub/697proj/')
-#setwd('/Users/samuelesquivel/Documents/GitHub/697project/')
-
+#setwd('/Users/emmaboudreau/Documents/GitHub/697proj/')
+setwd('/Users/samuelesquivel/Documents/GitHub/697project/')
 
 # read in the data-----
 data = read.csv('export.csv')
@@ -40,7 +39,7 @@ data = read.csv('export.csv')
 #removed unreported or unknown
 
 
-
+#Model building
 #---- 1 dataframe we could use
 data2 = select(data,-c(dist_dirc_exit, age, max_injr_svrty_cl,
                              numb_fatal_injr, numb_nonfatal_injr,injy_stat_descr,
@@ -91,11 +90,6 @@ mutate(season = ifelse(date>=WS | date<SE, "0", ifelse(date>=SE & date< SS, "1",
         ifelse(date>=SS&date< FE, "2", "3"))))
 
 
-
-####sam's additions below,###
-
-
-
 ###REGARDING TIME###
 #step 1
 #convert existing date and time to standard POSIX format
@@ -123,7 +117,6 @@ crash_count <- data4 %>%
 plot(crash_count$hour, crash_count$n, type = "l", xlab = "Hour of Day", ylab = "Crash Count", main = "Crash Count by Hour")
 
 
-
 ###REGARDING LOCATION###
 # Load required libraries
 library(ggplot2)
@@ -141,6 +134,7 @@ ggmap(boston_map) +
   labs(title = "Crashes in Boston, MA") +
   theme(plot.title = element_text(hjust = 0.5))
 
+
 #---- Logistic regression
 set.seed(100)
 split <- sample.split(data4$severity, SplitRatio = 0.7)
@@ -149,4 +143,39 @@ test_data <- subset(data4, split == FALSE)
 
 lg_model <- glm(severity~ lat + lon + numb_vehc + speed_limit + driver_age + 
                   total_occpt_in_vehc + season + hour + weather)
+
+
+
+
 #----
+
+
+###SVM Construction###
+# Load required libraries
+library(dplyr)
+library(e1071)  # For SVM
+library(caret)  # For model evaluation
+
+# Specify the column names for input variables and the target variable
+input_cols <- c("lat", "lon", "numb_vehc", "speed_limit", "driver_age", "total_occpt_in_vehc", "season", "weather")
+target_col <- "severity"
+
+# Split the data into training and testing sets
+set.seed(123)  # For reproducibility
+train_indices <- sample(1:nrow(data4), 0.7 * nrow(data4))  # 70% for training
+train_data <- data4[train_indices, ]
+test_data <- data4[-train_indices, ]
+
+# Create the SVM model
+svm_model <- svm(formula = as.formula(paste(target_col, "~", paste(input_cols, collapse = "+"))),
+                 data = train_data)
+
+# Make predictions on the test data
+predictions <- predict(svm_model, newdata = test_data)
+
+# Evaluate the model
+accuracy <- sum(predictions == test_data$severity) / nrow(test_data)
+print(paste("Accuracy:", accuracy))
+
+
+
