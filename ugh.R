@@ -14,8 +14,8 @@ library(ggplot2)
 
 library(caTools)
 
-setwd('/Users/emmaboudreau/Documents/GitHub/697proj/')
-#setwd('/Users/samuelesquivel/Documents/GitHub/697project/')
+#setwd('/Users/emmaboudreau/Documents/GitHub/697proj/')
+setwd('/Users/samuelesquivel/Documents/GitHub/697project/')
 
 # read in the data-----
 data = read.csv('export.csv')
@@ -178,9 +178,9 @@ F_Score
 
 
 
-library(pROC)
-roc <- roc(train$Class, logistic_model$fitted.values)
-auc(roc)
+#library(pROC)
+#roc <- roc(train$Class, logistic_model$fitted.values)
+#auc(roc)
 
 
 
