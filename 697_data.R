@@ -13,8 +13,8 @@ library(ggplot2)
 #install.packages("caTools")
 library(caTools)
 
-#setwd('/Users/emmaboudreau/Documents/GitHub/697proj/')
-setwd('/Users/samuelesquivel/Documents/GitHub/697project/')
+setwd('/Users/emmaboudreau/Documents/GitHub/697proj/')
+#setwd('/Users/samuelesquivel/Documents/GitHub/697project/')
 
 # read in the data-----
 data = read.csv('export.csv')
@@ -135,17 +135,40 @@ ggmap(boston_map) +
   theme(plot.title = element_text(hjust = 0.5))
 
 
+# set.seed(123)  # For reproducibility
+# train_indices <- sample(1:nrow(data4), 0.7 * nrow(data4))  # 70% for training
+# train_data <- data4[train_indices, ]
+# test_data <- data4[-train_indices, ]
+# 
+# 
+# lg_model <- glm(severity~ lat + lon + numb_vehc + speed_limit + driver_age + 
+#                   total_occpt_in_vehc + season + hour + weather,data = train_data)
+# 
+# 
+# predictions <- predict(lg_model, newdata = test_data)
+# accuracy <- sum(predictions == test_data$severity) / nrow(test_data)
+# print(paste("Accuracy:", accuracy))
+# 
+# 
+# check = predictions==test_data$severity
+
+
 #---- Logistic regression
-set.seed(100)
-split <- sample.split(data4$severity, SplitRatio = 0.7)
-train_data <- subset(data4, split == TRUE)
-test_data <- subset(data4, split == FALSE)
+input_cols <- c("lat", "lon", "numb_vehc", "speed_limit", "driver_age", "total_occpt_in_vehc", "season", "weather")
+target_col <- "severity"
 
-lg_model <- glm(severity~ lat + lon + numb_vehc + speed_limit + driver_age + 
-                  total_occpt_in_vehc + season + hour + weather)
+set.seed(123)  # For reproducibility
+train_indices <- sample(1:nrow(data4), 0.7 * nrow(data4))  # 70% for training
+train_data <- data4[train_indices, ]
+test_data <- data4[-train_indices, ]
 
 
+lg_model <- glm(formula = as.formula(paste(target_col, "~", paste(input_cols, collapse = "+"))), family = binomial(),
+                data = train_data)
 
+predictions <- predict(lg_model, newdata = test_data)
+accuracy <- sum(predictions == test_data$severity) / nrow(test_data)
+print(paste("Accuracy:", accuracy))
 
 #----
 
