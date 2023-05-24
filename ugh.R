@@ -102,15 +102,6 @@ barplot(crash_count$n, names.arg = crash_count$hour, xlab = "Hour of Day", ylab 
 
 
 
-
-
-
-
-
-
-
-
-
 ###Location in Boston map###
 # Load required libraries
 library(ggplot2)
@@ -127,9 +118,6 @@ ggmap(boston_map) +
   guides(alpha = FALSE) +
   labs(title = "Crashes in Boston, MA") +
   theme(plot.title = element_text(hjust = 0.5))
-
-
-
 
 
 
