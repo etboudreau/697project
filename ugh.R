@@ -236,7 +236,9 @@ print(paste("TNR:", TNR))
 
 
 ###SUBSEQUENT ANALYSIS###
+
 #---- GGplotsss
+
 season_counts <- data4 %>%
   group_by(season, severity) %>%
   summarise(count = n()) %>%
@@ -251,7 +253,7 @@ season_counts$season <- case_when(
 )
 
 #bar plot for season
-ggplot(season_counts, aes(x = season, y = count, fill = as.factor(severity))) +
+pl1 = ggplot(season_counts, aes(x = season, y = count, fill = as.factor(severity))) +
   geom_bar(stat = "identity") +
   labs(x = "Season", y = "Count", color = "grey", fill = "Severity") +
   geom_text(aes(label=count),vjust=1.6,
@@ -273,8 +275,9 @@ weather_counts$weather <- case_when(
   weather_counts$weather == 2 ~ "Rain",
   weather_counts$weather == 3 ~ "Snow"
 )
+
 #bar plot
-ggplot(weather_counts, aes(x = weather, y = count, fill = as.factor(severity))) +
+pl2 = ggplot(weather_counts, aes(x = weather, y = count, fill = as.factor(severity))) +
   geom_bar(stat = "identity") +
   labs(x = "Weather Condition", y = "Count",color = "grey", fill = "Severity") +
   geom_text(aes(label=count),vjust=1.6,
@@ -284,6 +287,55 @@ ggplot(weather_counts, aes(x = weather, y = count, fill = as.factor(severity))) 
   theme_minimal()
 
 
+# Calculate the count of injury and non-injury occurrences for each speed limit
+speed_limit_counts <- data4 %>%
+  group_by(speed_limit, severity) %>%
+  summarise(count = n()) %>%
+  ungroup()
+
+# Plot the scatter plot
+pl3 = ggplot(speed_limit_counts, aes(x = speed_limit, y = count, color = as.factor(severity))) +
+  geom_point() +
+  labs(x = "Speed Limit", y = "Count", color = "Severity") +
+  scale_fill_brewer(palette = "Paired",
+                    labels = c("Non-Injury", "Injury")) +
+  theme_minimal()
+
+
+# Define the age categories
+age_categories <- c("<16", "16-20", "21-24", "25-34", "35-44", "45-54", "55-64", "65-74", "74+")
+
+# Categorize the driver's age into age categories
+data4 <- data4 %>%
+  mutate(age_category = case_when(
+    driver_age < 16 ~ "<16",
+    driver_age >= 16 & driver_age <= 20 ~ "16-20",
+    driver_age >= 21 & driver_age <= 24 ~ "21-24",
+    driver_age >= 25 & driver_age <= 34 ~ "25-34",
+    driver_age >= 35 & driver_age <= 44 ~ "35-44",
+    driver_age >= 45 & driver_age <= 54 ~ "45-54",
+    driver_age >= 55 & driver_age <= 64 ~ "55-64",
+    driver_age >= 65 & driver_age <= 74 ~ "65-74",
+    driver_age >= 75 ~ "74+"
+  ))
+
+# Calculate the count of injury and non-injury occurrences for each age category
+age_counts <- data4 %>%
+  group_by(age_category, severity) %>%
+  summarise(count = n()) %>%
+  ungroup()
+
+# Plot the bar plot
+pl4 = ggplot(age_counts, aes(x = age_category, y = count, fill = as.factor(severity))) +
+  geom_bar(stat = "identity") +
+  labs(x = "Age Category", y = "Count", fill = "Severity") +
+  scale_fill_brewer(palette = "Paired",
+                    labels = c("Non-Injury", "Injury"))  +
+  theme_minimal() +
+  scale_x_discrete(labels = age_categories)
+
+library(ggpubr)
+ggarrange(pl1, pl2, pl4, ncol = 2,nrow = 2)
 
 
 
