@@ -84,17 +84,32 @@ data4 <- data3 %>%
 
 
 
+
 ###BASIC ANALYSIS###
 ###Crash count vs time of day###
-#do some analysis on the timing of events
-#extract the hour from the crash_date_time_standard column
+# Do some analysis on the timing of events
+# Extract the hour from the crash_date_time_standard column
 data4 <- data4 %>%
   mutate(hour = hour(crash_date_time_standard))
-#calculate the crash count for each hour
+
+# Calculate the crash count for each hour
 crash_count <- data4 %>%
   count(hour)
-#plot the crash count by hour
-plot(crash_count$hour, crash_count$n, type = "l", xlab = "Hour of Day", ylab = "Crash Count", main = "Crash Count by Hour")
+
+# Create a bar plot for crash count by hour
+barplot(crash_count$n, names.arg = crash_count$hour, xlab = "Hour of Day", ylab = "Crash Count",
+        main = "Crash Count by Hour", col = "skyblue", border = "black", ylim = c(0, max(crash_count$n) + 10))
+
+
+
+
+
+
+
+
+
+
+
 
 ###Location in Boston map###
 # Load required libraries
@@ -107,11 +122,12 @@ boston_map <- get_stamenmap(boston_bounds, maptype = "toner-lite")
 #plot the map of Boston
 ggmap(boston_map) +
   #add points representing crash locations
-  geom_point(data = data4, aes(x = lon, y = lat), color = "red", alpha = 0.5) +
+  geom_point(data = data4, aes(x = lon, y = lat), color = "blue", alpha = 0.5) +
   #adjust the transparency and color of the points
   guides(alpha = FALSE) +
   labs(title = "Crashes in Boston, MA") +
   theme(plot.title = element_text(hjust = 0.5))
+
 
 
 
@@ -224,10 +240,6 @@ TN <- confusion[1, 1]  # True negatives
 FP <- confusion[1, 2]  # False positives
 TNR <- TN / (TN + FP)
 print(paste("TNR:", TNR))
-
-
-
-
 
 
 
