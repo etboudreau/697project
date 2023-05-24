@@ -14,8 +14,8 @@ library(ggplot2)
 
 library(caTools)
 
-#setwd('/Users/emmaboudreau/Documents/GitHub/697proj/')
-setwd('/Users/samuelesquivel/Documents/GitHub/697project/')
+setwd('/Users/emmaboudreau/Documents/GitHub/697proj/')
+#setwd('/Users/samuelesquivel/Documents/GitHub/697project/')
 
 # read in the data-----
 data = read.csv('export.csv')
@@ -202,3 +202,54 @@ print(paste("Accuracy:", accuracy))
 
 
 
+
+
+
+#---- GGplotsss
+
+season_counts <- data4 %>%
+  group_by(season, severity) %>%
+  summarise(count = n()) %>%
+  ungroup()
+
+#season labels
+season_counts$season <- case_when(
+  season_counts$season == "0" ~ "Winter",
+  season_counts$season == "1" ~ "Spring",
+  season_counts$season == "2" ~ "Summer",
+  season_counts$season == "3" ~ "Fall"
+)
+
+#bar plot for season
+ggplot(season_counts, aes(x = season, y = count, fill = as.factor(severity))) +
+  geom_bar(stat = "identity") +
+  labs(x = "Season", y = "Count", color = "grey", fill = "Severity") +
+  geom_text(aes(label=count),vjust=1.6,
+            size=3.5, color = "white") +
+  scale_fill_brewer(palette = "Paired",
+                    labels = c("Non-Injury", "Injury")) +
+  theme_minimal()
+
+#injury (severity 1) and non-injury (severity 0) in each weather condition
+weather_counts <- data4 %>%
+  group_by(weather, severity) %>%
+  summarise(count = n()) %>%
+  ungroup()
+
+#weather code
+weather_counts$weather <- case_when(
+  weather_counts$weather == 0 ~ "Clear",
+  weather_counts$weather == 1 ~ "Cloudy",
+  weather_counts$weather == 2 ~ "Rain",
+  weather_counts$weather == 3 ~ "Snow"
+)
+
+#bar plot
+ggplot(weather_counts, aes(x = weather, y = count, fill = as.factor(severity))) +
+  geom_bar(stat = "identity") +
+  labs(x = "Weather Condition", y = "Count",color = "grey", fill = "Severity") +
+  geom_text(aes(label=count),vjust=1.6,
+            size=3.5, color = "white") +
+  scale_fill_brewer(palette = "Paired",
+                    labels = c("Non-Injury", "Injury")) +
+  theme_minimal()
